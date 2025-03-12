@@ -21,6 +21,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
 
     <link rel="stylesheet" href="./css/index.css">
 
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
         <!-- Load TensorFlow.js -->
@@ -61,8 +64,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
         <div class="row">
             <div class=" col-md-7 d-flex justify-content-center">
 
-                <div
-                    style=" margin-top: 15vh; width:100%; height: 256px; background-image: url('./img/ui/index_bg_1.png'); background-repeat: no-repeat; background-size: contain;background-position: center;">
+                <div style=" margin-top: 15vh; width:100%; height: 256px; background-repeat: no-repeat; background-size: contain;background-position: center;">
     
                     <div class="d-flex justify-content-center">
     
@@ -75,19 +77,17 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
                                 oninput="onFileSelected()">
                         </div>
                     </div>
-                    <div class="d-flex justify-content-end ">
-                        <p><button onclick="onFileSubmitPress()" value="Next" id="submit-button"
-                                class=" censorble-round-button" style="margin-right: 72px; margin-top:12px;"><i class="bi bi-arrow-right white"></i></button></p>
-    
-                    </div>
+        
                 </div>
+
+                <canvas id="preview-canvas" style="display:none"></canvas> 
             </div>
 
 
             <div class=" col-md-5 d-flex justify-content-center " id="results-container">
 
                 <div
-                    style=" margin-top: 15vh; width:100%; height: 256px; background-image: url('./img/ui/index_bg_1.png'); background-repeat: no-repeat; background-size: contain;background-position: center;">
+                    style=" margin-top: 15vh; width:100%; height: 256px; background-repeat: no-repeat; background-size: contain;background-position: center;">
     
                     <div class="d-flex justify-content-center">
     
@@ -125,8 +125,6 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-
-    <script src="./js/constants.js"></script>
 
     <script src="./js/index.js"></script>
 
