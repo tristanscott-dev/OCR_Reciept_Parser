@@ -48,13 +48,15 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
                                 <label for="formFile" class="form-label happy-monkey-regular" style="font-size: 24px;">Select a reciept</label>
                             </div>
                             <input class="form-control " type="file" name="file" id="formFile" accept="image/*"
-                                oninput="onFileSelected()">
+                               >
                         </div>
                     </div>
         
                 </div>
 
-                <canvas id="preview-canvas" style="display:none; width:20%; height: 80vh;"></canvas> 
+                <canvas id="preview-canvas" style="display:none" width="500" height="500"></canvas> 
+
+
             </div>
 
 
@@ -91,6 +93,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+
+        <script src="./js/scroll_pan_canvas.js"></script>
 
     <script src="./js/index.js"></script>
 

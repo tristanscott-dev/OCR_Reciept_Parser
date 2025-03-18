@@ -1,4 +1,8 @@
+var scale = 1;
+var ctx;
+var canvas;
 
+var image;
 
 $(document).ready(function(){
 
@@ -12,8 +16,16 @@ $(document).ready(function(){
     //     await worker.terminate();
     // })();
 
+    canvas = document.getElementById("preview-canvas");
+    ctx = canvas.getContext("2d");
 
-    const image = document.getElementById("receipt-proxy");
+
+    const fileInput = document.getElementById("formFile");
+
+    fileInput.addEventListener("change", onFileSelected);
+
+
+    image = document.getElementById("receipt-proxy");
     $(image).on('load', function () {
 
 
@@ -35,42 +47,72 @@ $(document).ready(function(){
 
    
 
-        var canvas = document.getElementById("preview-canvas");
+       
         canvas.style.display = 'block';
+    
+
+        canvas.addEventListener('mousedown', onPointerDown)
+        canvas.addEventListener('touchstart', (e) => handleTouch(e, onPointerDown))
+        canvas.addEventListener('mouseup', onPointerUp)
+        canvas.addEventListener('touchend',  (e) => handleTouch(e, onPointerUp))
+        canvas.addEventListener('mousemove', onPointerMove)
+        canvas.addEventListener('touchmove', (e) => handleTouch(e, onPointerMove))
+        canvas.addEventListener( 'wheel', (e) => {
+
+
+           scale =  scale +  e.deltaY * SCROLL_SENSITIVITY;
+
+            ctx.scale(scale, scale)
+
+            console.log("canvas wheel " , scale);
+
+            drawCanvas();
+        })
     
         console.log("canvas width " , canvas.width);
         console.log("canvas height " , canvas.height);
         // updateCanvasSize();
-    
+
+        var canvasMeasuredWidth = canvas.getBoundingClientRect().width;
+        var canvasMeasuredHeight = canvas.getBoundingClientRect().height;
+
+        console.log("canvas canvasMeasuredWidth: " , canvasMeasuredWidth);
+
+        console.log("canvas canvasMeasuredHeight: " , canvasMeasuredHeight);
 
         var imageDrawWidth;
         var imageDrawHeight;
 
-        var widthIsShortestSideLength = canvas.width <  canvas.height;
+        var widthIsShortestSideLength = canvasMeasuredWidth < canvasMeasuredHeight;
         if(widthIsShortestSideLength){
 
             // if the width is the shortest we need to use it as our max and 
             // resize the height accordingly
-            imageDrawWidth = image.width > canvas.width ? canvas.width : image.width;
+            imageDrawWidth = image.width > canvasMeasuredWidth ? canvasMeasuredWidth : image.width;
             imageDrawHeight = imageDrawWidth * imageWidthAspectRatio ;
+
+            console.log("widthIsShortestSideLength " , imageDrawWidth);
+
+            console.log("widthIsShortestSideLength imageDrawWidth " , imageDrawWidth);
+            console.log("widthIsShortestSideLength imageDrawHeight " , imageDrawHeight);
 
         }else{
 
+
+           // console.log("widthIsShortestSideLength " , imageDrawWidth);
+
             // the height is the shortet and we need to use its ratio when drawing
-            imageDrawHeight = image.height > canvas.height ? canvas.height : image.height;
+            imageDrawHeight = image.height > canvasMeasuredHeight ? canvasMeasuredHeight : image.height;
             imageDrawWidth = imageDrawHeight * imageHeightAspectRatio ;
+
+
+            console.log("widthIsShortestSideLength NOT : " , imageDrawWidth);
+
+            console.log("widthIsShortestSideLength NOT :  imageDrawWidth " , imageDrawWidth);
+            console.log("widthIsShortestSideLength NOT :  imageDrawHeight " , imageDrawHeight);
         }
 
 
-
-      
-
-
-
-        var ctx = canvas.getContext("2d");
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-
-        ctx.drawImage(image,imageDrawWi,0, imageDrawWidth, imageDrawHeight );  
 
         // initCanvasData().then(() => {
             
@@ -81,6 +123,8 @@ $(document).ready(function(){
 
         // });
 
+        // Ready, set, go
+        //draw(canvas, ctx);
 
 
     });
@@ -91,11 +135,38 @@ $(document).ready(function(){
 
 });
 
-function onFileSelected(){
+function drawCanvas(){
+
+    var hRatio = canvas.width  / image.width    ;
+    var vRatio =  canvas.height / image.height  ;
+
+    var ratio  = Math.min ( hRatio, vRatio );
+
+
+    var centerShift_x = ( canvas.width - image.width * ratio ) / 2;
+    var centerShift_y = ( canvas.height - image.height * ratio ) / 2;  
+
+   
+    // ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+
+    ctx.drawImage(image,0, 0, image.width , image.height, 0, 0,  image.width * ratio, image.height * ratio);  
+
+
+}
+
+function onFileSelected(event){
     console.log("File Selected");
 
     console.log($("#formFile").prop('files')[0]);
 
+    const file = event.target.files[0];
+
+    const image = document.getElementById("receipt-proxy");
+
+    //image.src = e.target.result;
+
+    image.src = URL.createObjectURL(file);
 
 
     $("#file-selection-container").hide();
@@ -113,9 +184,9 @@ function onFileSelected(){
         fr.onload = function(e) {
 
 
-            const image = document.getElementById("receipt-proxy");
+           // const image = document.getElementById("receipt-proxy");
 
-            image.src = e.target.result;
+           // image.src = e.target.result;
             // let img = new Image();
             // img.src = e.target.result;
 
@@ -130,7 +201,7 @@ function onFileSelected(){
             // };
         };
         //fr.onload = createImage;   // onload fires after reading is complete
-        fr.readAsDataURL($("#formFile").prop('files')[0]);  
+       // fr.readAsDataURL($("#formFile").prop('files')[0]);  
 
 
  
