@@ -26,45 +26,19 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-        <!-- Load TensorFlow.js -->
-        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
-
-
-        <!-- Place your code in the script tag below. You can also use an external .js file -->
-        <script>
-          // Notice there is no 'import' statement. 'tf' is available on the index-page
-          // because of the script tag above.
-    
-          // Define a model for linear regression.
-          const model = tf.sequential();
-          model.add(tf.layers.dense({units: 1, inputShape: [1]}));
-    
-          // Prepare the model for training: Specify the loss and the optimizer.
-          model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
-    
-          // Generate some synthetic data for training.
-          const xs = tf.tensor2d([1, 2, 3, 4], [4, 1]);
-          const ys = tf.tensor2d([1, 3, 5, 7], [4, 1]);
-    
-          // Train the model using the data.
-          model.fit(xs, ys).then(() => {
-            // Use the model to do inference on a data point the model hasn't seen before:
-            // Open the browser devtools to see the output
-            model.predict(tf.tensor2d([5], [1, 1])).print();
-          });
-        </script>
+       
 
 </head>
 
 <body class="watercolour_nz_body">
 
 
-    <div class="container pt-2 content-container primary-container">
+    <div class="container pt-2 ">
 
         <div class="row">
-            <div class=" col-md-7 d-flex justify-content-center">
+            <div class=" col-md-7 d-flex justify-content-center" id="receipt-container">
 
-                <div style=" margin-top: 15vh; width:100%; height: 256px; background-repeat: no-repeat; background-size: contain;background-position: center;">
+                <div id="file-selection-container" style=" margin-top: 15vh; width:100%; height: 256px; background-repeat: no-repeat; background-size: contain;background-position: center;">
     
                     <div class="d-flex justify-content-center">
     
@@ -80,7 +54,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
         
                 </div>
 
-                <canvas id="preview-canvas" style="display:none"></canvas> 
+                <canvas id="preview-canvas" style="display:none; width:20%; height: 80vh;"></canvas> 
             </div>
 
 
@@ -91,20 +65,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
     
                     <div class="d-flex justify-content-center">
     
-                        <div class="" style="width:280px; margin-top:55px;">
-                            <div class="d-flex justify-content-center">
-    
-                                <label for="formFile" class="form-label happy-monkey-regular" style="font-size: 24px;">Choose a file to Censor</label>
-                            </div>
-                            <input class="form-control " type="file" name="file" id="formFile" accept=".mp4"
-                                oninput="onFileSelected()">
-                        </div>
+
                     </div>
-                    <div class="d-flex justify-content-end ">
-                        <p><button onclick="onFileSubmitPress()" value="Next" id="submit-button"
-                                class=" censorble-round-button" style="margin-right: 72px; margin-top:12px;"><i class="bi bi-arrow-right white"></i></button></p>
-    
-                    </div>
+
                 </div>
             </div>
 
@@ -113,8 +76,11 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
 
         <!-- </form> -->
     </div>
-    </div>
 
+    <div style="display:none;">
+        <img  src="" id="receipt-proxy">
+
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
