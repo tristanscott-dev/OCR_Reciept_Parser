@@ -1,8 +1,28 @@
-var scale = 1;
+let pan = { x: window.innerWidth/2, y: window.innerHeight/2 }
+let zoom = 1;
+let isPanning = false;
+
+let panStart = { x: 0, y: 0 }
+
+
 var ctx;
 var canvas;
 
 var image;
+
+
+// Gets the relevant location from a mouse or single touch event
+function getEventLocation(e)
+{
+    if (e.touches && e.touches.length == 1)
+    {
+        return { x:e.touches[0].clientX, y: e.touches[0].clientY }
+    }
+    else if (e.clientX && e.clientY)
+    {
+        return { x: e.clientX, y: e.clientY }        
+    }
+}
 
 $(document).ready(function(){
 
@@ -51,20 +71,47 @@ $(document).ready(function(){
         canvas.style.display = 'block';
     
 
-        canvas.addEventListener('mousedown', onPointerDown)
-        canvas.addEventListener('touchstart', (e) => handleTouch(e, onPointerDown))
-        canvas.addEventListener('mouseup', onPointerUp)
-        canvas.addEventListener('touchend',  (e) => handleTouch(e, onPointerUp))
-        canvas.addEventListener('mousemove', onPointerMove)
-        canvas.addEventListener('touchmove', (e) => handleTouch(e, onPointerMove))
+        canvas.addEventListener('mousedown', (e) => {
+
+            isPanning = true;
+
+            panStart.x = getEventLocation(e).x / zoom - cameraOffset.x
+            panStart.y = getEventLocation(e).y / zoom - cameraOffset.y
+
+        })
+        // canvas.addEventListener('touchstart', (e) => handleTouch(e, onPointerDown))
+        canvas.addEventListener('mouseup', (e) => {
+
+            isPanning = false;
+        })
+        // canvas.addEventListener('touchend',  (e) => handleTouch(e, onPointerUp))
+        canvas.addEventListener('mousemove', (e) => {
+
+            if (isDragging)
+            {
+                pan.x = getEventLocation(e).x / zoom - panStart.x
+                pan.y = getEventLocation(e).y / zoom - panStart.y
+            }
+
+        });
+
+        // canvas.addEventListener('touchmove', (e) => handleTouch(e, onPointerMove))
         canvas.addEventListener( 'wheel', (e) => {
 
+            if (!isDragging)
+            {
+                return;
+            }
 
-           scale =  scale +  e.deltaY * SCROLL_SENSITIVITY;
+            zoom +=  e.deltaY * SCROLL_SENSITIVITY;
 
-            ctx.scale(scale, scale)
+           zoom = Math.min( zoom, MAX_ZOOM )
+           zoom = Math.max( zoom, MIN_ZOOM )
+           
 
-            console.log("canvas wheel " , scale);
+            
+
+            console.log("canvas wheel " , zoom);
 
             drawCanvas();
         })
@@ -149,6 +196,10 @@ function drawCanvas(){
    
     // ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.clearRect(0,0,canvas.width, canvas.height);
+
+    // ctx.translate( canvas.width / 2, canvas.height / 2 )
+    // ctx.scale(zoom, zoom)
+    // ctx.translate( -canvas.width / 2 + cameraOffset.x, -canvas.height / 2 + cameraOffset.y )
 
     ctx.drawImage(image,0, 0, image.width , image.height, 0, 0,  image.width * ratio, image.height * ratio);  
 
