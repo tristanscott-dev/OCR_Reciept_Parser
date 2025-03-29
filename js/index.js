@@ -309,3 +309,9 @@ function onFileSelected(event){
 
 // }
 
+
+function processCanvasImage(){
+
+    console.log("processCanvasImage");
+}
+
