@@ -14,6 +14,8 @@ var canvas;
 
 var image;
 
+var canvasPixelDataOriginal = [];
+
 // https://phrogz.net/tmp/canvas_zoom_to_cursor.html
 
 // Gets the relevant location from a mouse or single touch event
@@ -40,8 +42,52 @@ $(document).ready(function(){
     //     console.log(text);
     //     await worker.terminate();
     // })();
+    var slider = document.getElementById("contrast-slider");
+    slider.oninput = function() {
+
+        if(!ctx){
+        return;
+        }
+
+        // ctx.globalCompositeOperation='difference';
+        // ctx.fillStyle='white';
+        // ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        
 
 
+
+        // var pixels = ctx.getImageData(0, 0, canvas.width,canvas.height);
+        // gradient_internal(pixels, [10, -.10, 10]); // Apply Sobel operator
+        // ctx.putImageData(pixels, 0, 0);
+        //var pixels = ctx.getImageData(0, 0, canvas.width,canvas.height);
+
+        
+        enhance(canvasPixelDataOriginal, this.value );
+        //var canvasImageData = ctx.getImageData(0, 0, canvas.width,canvas.height)
+
+        //ctx.putImageData(pixels, 0, 0);
+
+
+        //  ctx.filter = 'invert(1)'
+       // drawCanvas();
+        // ctx.filter = new CanvasFilter([
+        //     {
+        //       filter: "convolveMatrix",
+        //       kernelMatrix: [[0, 1, 0], [1, -4, 1], [0, 1, 0]],
+        //        bias: 0,
+        //        divisor: 1,
+        //        preserveAlpha: "true",
+        //     }
+        //  ]);
+
+        console.log(" Apply contrast ", this.value * 0.01);
+        // var origBits = ctx.getImageData(0, 0, canvas.width , canvas.height  );
+        // contrastImage(origBits, this.value * 0.01);
+        // ctx.putImageData(origBits, 0, 0);
+
+      
+    }
 
     canvas = document.getElementById("preview-canvas");
     ctx = canvas.getContext("2d");
@@ -119,6 +165,7 @@ $(document).ready(function(){
     image = document.getElementById("receipt-proxy");
     $(image).on('load', function () {
 
+        console.log("image load");
 
         var imageWidthAspectRatio = image.height/image.width; 
         var imageHeightAspectRatio = image.width/image.height; 
@@ -159,7 +206,7 @@ $(document).ready(function(){
 
         drawCanvas();
 
-    
+        canvasPixelDataOriginal = ctx.getImageData(0, 0, canvas.width,canvas.height).data;
 
     });
 
@@ -227,8 +274,35 @@ function drawCanvas(){
     ctx.scale(zoom, zoom)
     // ctx.translate( -canvas.width / 2 + cameraOffset.x, -canvas.height / 2 + cameraOffset.y )
 
+    
+    //ctx.fillStyle = "black";
+    //ctx.fillRect(0,0,canvas.width,canvas.height);
+    //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+   // ctx.globalCompositeOperation = "color-burn";
     ctx.drawImage(image,0, 0, image.width , image.height, 0, 0,  image.width * ratio, image.height * ratio);  
 
+  
+
+}
+
+async function downloadFileFromServer (){
+ 
+    var url = "https://drive.google.com/thumbnail?id=1qDvSH_t0wXO_hCI4HdSfmBsLzR5Zvang&sz=w1000";
+    var base64Data = "";
+    try {
+        let remoteImage = await axios.get(url, { responseType: 'arraybuffer' });
+        let raw = Buffer.from(remoteImage.data).toString('base64');
+        base64Data =  "data:" + image.headers["content-type"] + ";base64,"+raw;
+    } catch (error) {
+        console.log(error)
+    } 
+  
+  
+    const image = document.getElementById("receipt-proxy");
+
+
+    image.src = base64Data ;
+    
 
 }
 
@@ -240,10 +314,15 @@ function onFileSelected(event){
     const file = event.target.files[0];
 
     const image = document.getElementById("receipt-proxy");
-
+  
+    // image.crossOrigin = "drive.google.com";
     //image.src = e.target.result;
 
-    image.src = URL.createObjectURL(file);
+    //image.src = URL.createObjectURL(file);
+
+    //image.src = "https://drive.google.com/thumbnail?id=1qDvSH_t0wXO_hCI4HdSfmBsLzR5Zvang&sz=w1000";
+
+    downloadFileFromServer();
 
 
     $("#file-selection-container").hide();
@@ -313,5 +392,166 @@ function onFileSelected(event){
 function processCanvasImage(){
 
     console.log("processCanvasImage");
+    //canvas
+
+    (async () => {
+        const worker = await Tesseract.createWorker('eng');
+        const { data: { text } } = await worker.recognize(canvas.toDataURL());
+        console.log(text);
+
+        parseTextResults(text);
+
+        await worker.terminate();
+    })();
 }
 
+function parseTextResults(detectedText){
+
+    // output 
+    //RECIEPT DATE	ITEM	SUPPLIER	NOTES	COST RECIEPT		 Link																			
+    // find all monetary values https://stackoverflow.com/questions/1547574/regex-for-prices
+   // const re = new RegExp("");
+    const priceArray = detectedText.match(/\b\d{1,3}(?:,\d{3})*(?:\.\d{2})?\b/g);
+    var priceOptionsHtml;
+    priceArray.forEach((priceText) => {
+
+        priceOptionsHtml += `<input type="button" id="copy-to-clipboard-button" value="${priceText}" onclick="updatePriceInput('${priceText}')">`;
+
+    });
+
+    $("#detected-price-options").html(priceOptionsHtml);
+    var dateOptionsHtml;
+
+    const dateArray = detectedText.match(/\b(?:\d{1,2}[-/])?\d{1,2}[-/]\d{4}\b/g);
+    dateArray.forEach((dateText) => {
+
+        dateOptionsHtml += `<input type="button" id="copy-to-clipboard-button" value="${dateText}" onclick="updateDateInput('${dateText}')">`;
+
+    });
+
+    $("#detected-date-options").html(dateOptionsHtml);
+
+    console.log("price array ", priceArray)
+    console.log("price array ", dateArray)
+
+
+}
+
+
+function updatePriceInput(newPriceValue){
+    $("#cost-input").val(newPriceValue);
+}
+
+function updateDateInput(newDateValue){
+    $("#date-input").val(newDateValue);
+}
+
+function copyInputsToClipboard(){
+
+
+
+    var date = $("#date-input").val();
+    var item_description = $("#item-input").val();
+    var supplier = $("#supplier-input").val();
+    var notes = $("#notes-input").val();
+    var cost = $("#cost-input").val();
+    var reciept_link = $("#reciept-link-input").val();
+    
+
+    var clipboardText = `${date}, ${item_description}, ${supplier}, ${notes}, ${cost}, ${reciept_link}`;
+     // Copy the text inside the text field
+    // navigator.clipboard.writeText(copyText.value);
+
+    navigator.clipboard.writeText(clipboardText).then(function() {
+        console.log('Async: Copying to clipboard was successful!');
+      }, function(err) {
+        console.error('Async: Could not copy text: ', err);
+      });
+
+}
+
+
+function contrastImage(imageData, contrast) {  // contrast input as percent; range [-1..1]
+    var data = imageData.data;  // Note: original dataset modified directly!
+    contrast *= 255;
+    var factor = (contrast + 255) / (255.01 - contrast);  //add .1 to avoid /0 error.
+
+    for(var i=0;i<data.length;i+=4)
+    {
+        data[i] = factor * (data[i] - 128) + 128;
+        data[i+1] = factor * (data[i+1] - 128) + 128;
+        data[i+2] = factor * (data[i+2] - 128) + 128;
+    }
+    return imageData;  //optional (e.g. for filter function chaining)
+}
+
+
+//https://fiveko.com/blog/image-edge-detection-with-simple-javascript/
+/**
+* @param data - input pixels data
+* @param idx - the index of the central pixel
+* @param w - image width (width*4 in case of RGBA)
+* @param m - the gradient mask (for Sobel=[1, 2, 1])
+*/
+function conv3x(data, idx, w, m){
+    return (m[0]*data[idx - w - 4] + m[1]*data[idx - 4] + m[2]*data[idx + w - 4]
+        -m[0]*data[idx - w + 4] - m[1]*data[idx + 4] - m[2]*data[idx + 4 + 4]);
+  }
+  
+  function conv3y(data, idx, w, m){
+    return (m[0]*data[idx - w - 4] + m[1]*data[idx - w] + m[2]*data[idx - w + 4]
+        -(m[0]*data[idx + w - 4] + m[1]*data[idx + w] + m[2]*data[idx + w + 4]));
+  }
+  
+  
+  /**
+  * @param pixels - Object of image parameters
+  * @param mask - gradient operator e.g. Prewitt, Sobel, Scharr, etc. 
+  */
+  function gradient_internal(pixels, mask)
+  {
+    var data = pixels.data;
+    var w = pixels.width*4;
+    var l = data.length - w - 4;
+    var buff = new data.constructor(new ArrayBuffer(data.length));
+    
+    for (var i = w + 4; i < l; i+=4){
+      var dx = conv3x(data, i, w, mask);
+      var dy = conv3y(data, i, w, mask);
+      buff[i] = buff[i + 1] = buff[i + 2] = Math.sqrt(dx*dx + dy*dy);
+      buff[i + 3] = 255;
+    }
+    pixels.data.set(buff);
+  }
+
+  function enhance(pixels, pixelThreshold)
+  {
+
+
+    var canvasImageData = ctx.getImageData(0, 0, canvas.width,canvas.height)
+    var data = canvasImageData.data;
+
+    
+    var buff = new data.constructor(new ArrayBuffer(data.length));
+
+    var newPixels = [pixels.length];
+
+    console.log("enhance newPixels " , newPixels);
+
+    // iterate over the four pixel values
+    for (var i = 0; i <  pixels.length; i ++){
+      
+        if(pixels[i] < pixelThreshold){
+            buff[i] = 0;
+        }else{
+            buff[i] = pixels[i];
+        }
+    }
+
+    canvasImageData.data.set(buff);
+
+    //newPixels.data.set(buff);
+    ctx.putImageData(canvasImageData, 0, 0);
+    
+    //return newPixels;
+  }

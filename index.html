@@ -53,11 +53,13 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
                     </div>
         
                 </div>
-
+                <div class="slidecontainer">
+                    <input type="range" min="0" max="255" value="50" class="slider" id="contrast-slider">
+                  </div>
                 <button class="btn btn-primary" onclick="processCanvasImage()">PROCESS</button>
 
                 <canvas id="preview-canvas" style="display:block" width="500" height="500"></canvas> 
-
+     
 
             </div>
 
@@ -68,13 +70,33 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
                     style=" margin-top: 15vh; width:100%; height: 256px; background-repeat: no-repeat; background-size: contain;background-position: center;">
     
                     <div class="d-flex justify-content-center">
-    
+                            <p id="detected-price-options">
+
+                            </p>
+
+                            <p id="detected-date-options">
+
+                            </p>
 
                     </div>
 
                 </div>
             </div>
 
+        </div>
+        sfsf, wwwww, ffff, fyyyyy, iiii, undefined
+        <div class="row mt-5">
+
+            <div class=" col-md-12 d-flex justify-content-center " id="">
+                <input type="text" id="date-input" placeholder="date">
+                <input type="text" id="item-input" placeholder="item description">
+                <input type="text" id="supplier-input" placeholder="supplier">
+                <input type="text" id="notes-input" placeholder="notes">
+                <input type="text" id="cost-input" placeholder="cost">
+                <input type="text" id="reciept-link-input" placeholder="reciept link">
+                <input type="button" id="copy-to-clipboard-button"  onclick="copyInputsToClipboard()" value="Copy to clipboard">
+
+            </div>
         </div>
         <!-- <form method="POST" action="./upload" enctype="multipart/form-data"> -->
 
@@ -85,7 +107,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
         <img  src="" id="receipt-proxy">
 
     </div>
-
+    <iframe src="https://drive.google.com/file/d/1qDvSH_t0wXO_hCI4HdSfmBsLzR5Zvang/preview" width="640" height="480" allow="autoplay"></iframe>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"></script>
@@ -95,7 +117,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <!-- <script src="./js/scroll_pan_canvas.js"></script> -->
 
     <script src="./js/index.js"></script>
