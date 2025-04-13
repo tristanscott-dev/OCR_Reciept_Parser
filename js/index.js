@@ -3,11 +3,15 @@ const MAX_ZOOM = 2;
 const MIN_ZOOM = 0.4;
 
 let pan = { x: window.innerWidth/2, y: window.innerHeight/2 }
-let zoom = 1;
+let zoom = 1.5;
+let prevZoomSliderVal = 0;
+
 let isPanning = false;
+let prevPanXVal = 0;
+let prevPanYVal = 0;
+let panOffset = { x: 0, y: 0 }
 
-let panStart = { x: 0, y: 0 }
-
+var originalFileName="";
 
 var ctx;
 var canvas;
@@ -42,6 +46,67 @@ $(document).ready(function(){
     //     console.log(text);
     //     await worker.terminate();
     // })();
+
+    var panYSlider = document.getElementById("pan-y-slider");
+    panYSlider.oninput = function() {
+
+        if(!ctx){
+        return;
+        }
+
+
+        if(this.value  > prevPanYVal){
+
+            // spaning left
+            panOffset.y = -2;
+
+
+        }else{
+            //panning right
+            panOffset.y = 2;
+        }
+
+        prevPanYVal = this.value;
+        panOffset.x = 0;
+
+        // dissable zoom while panning
+        zoom = 1;
+       
+        drawCanvas();
+
+        
+
+    }
+
+    var panXSlider = document.getElementById("pan-x-slider");
+    panXSlider.oninput = function() {
+
+        if(!ctx){
+        return;
+        }
+
+        if(this.value  > prevPanXVal){
+
+            // spaning left
+            panOffset.x = -2;
+
+
+        }else{
+            //panning right
+            panOffset.x = 2;
+        }
+
+        prevPanXVal = this.value;
+
+        panOffset.y = 0;
+
+        // dissable zoom while panning
+        zoom = 1;
+       
+        drawCanvas();
+
+    }
+
     var slider = document.getElementById("contrast-slider");
     slider.oninput = function() {
 
@@ -49,51 +114,46 @@ $(document).ready(function(){
         return;
         }
 
-        // ctx.globalCompositeOperation='difference';
-        // ctx.fillStyle='white';
-        // ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        
-
-
-
-        // var pixels = ctx.getImageData(0, 0, canvas.width,canvas.height);
-        // gradient_internal(pixels, [10, -.10, 10]); // Apply Sobel operator
-        // ctx.putImageData(pixels, 0, 0);
-        //var pixels = ctx.getImageData(0, 0, canvas.width,canvas.height);
-
-        
         enhance(canvasPixelDataOriginal, this.value );
-        //var canvasImageData = ctx.getImageData(0, 0, canvas.width,canvas.height)
 
-        //ctx.putImageData(pixels, 0, 0);
+    }
 
 
-        //  ctx.filter = 'invert(1)'
-       // drawCanvas();
-        // ctx.filter = new CanvasFilter([
-        //     {
-        //       filter: "convolveMatrix",
-        //       kernelMatrix: [[0, 1, 0], [1, -4, 1], [0, 1, 0]],
-        //        bias: 0,
-        //        divisor: 1,
-        //        preserveAlpha: "true",
-        //     }
-        //  ]);
+    var zoomSlider = document.getElementById("zoom-slider");
+    zoomSlider.oninput = function() {
 
-        console.log(" Apply contrast ", this.value * 0.01);
-        // var origBits = ctx.getImageData(0, 0, canvas.width , canvas.height  );
-        // contrastImage(origBits, this.value * 0.01);
-        // ctx.putImageData(origBits, 0, 0);
+        if(!ctx){
+        return;
+        }
 
+        console.log(" Apply zoom ", this.value );
+
+    
+
+        if(this.value  > prevZoomSliderVal){
+
+            // scaling up
+            zoom = 1.1;
+
+
+        }else{
+            //scaling down
+            zoom = 0.9;
+        }
+
+        panOffset = {x:0, y:0};
+
+        prevZoomSliderVal = this.value;
+        drawCanvas();
+      
       
     }
 
     canvas = document.getElementById("preview-canvas");
     ctx = canvas.getContext("2d");
 
-    canvas.addEventListener('DOMMouseScroll',handleMouseScroll,false);
-    canvas.addEventListener('mousewheel',handleMouseScroll,false);
+    //canvas.addEventListener('DOMMouseScroll',handleMouseScroll,false);
+    //canvas.addEventListener('mousewheel',handleMouseScroll,false);
 
 
     canvas.addEventListener('mousedown', (e) => {
@@ -119,42 +179,6 @@ $(document).ready(function(){
         // }
 
     });
-
-    // canvas.addEventListener('touchmove', (e) => handleTouch(e, onPointerMove))
-    // canvas.addEventListener( 'wheel', (e) => {
-
-    //     //console.log("canvas wheel " , e.deltaY );
-
-    //     // if (!isPanning)
-    //     // {
-    //     //     return;
-    //     // }
-
-    //    zoom +=  e.deltaY * SCROLL_SENSITIVITY;
-    //    console.log("canvas new zoom " , zoom );
-
-    //    if( zoom >= MAX_ZOOM){
-    //         zoom = MAX_ZOOM;
-    //         return;
-    //    }
-
-    //    if( zoom <= MIN_ZOOM){
-    //         zoom = MIN_ZOOM;
-    //         return;
-    //     }
-
-
-    //    //zoom = Math.min( zoom, MAX_ZOOM )
-    //  //  zoom = Math.max( zoom, MIN_ZOOM )
-       
-
-    
-
-    //    // drawCanvas();
-
-    //    // e.preventDefault();
-    // })
-
 
 
     const fileInput = document.getElementById("formFile");
@@ -191,17 +215,6 @@ $(document).ready(function(){
 
 
     
-        // console.log("canvas width " , canvas.width);
-        // console.log("canvas height " , canvas.height);
-        // // updateCanvasSize();
-
-        // var canvasMeasuredWidth = canvas.getBoundingClientRect().width;
-        // var canvasMeasuredHeight = canvas.getBoundingClientRect().height;
-
-        // console.log("canvas canvasMeasuredWidth: " , canvasMeasuredWidth);
-
-        // console.log("canvas canvasMeasuredHeight: " , canvasMeasuredHeight);
-
 
 
         drawCanvas();
@@ -216,14 +229,27 @@ $(document).ready(function(){
 
 });
 
-function doZoom(clicks){
-   // var pt = ctx.transformedPoint(lastX,lastY);
-  //  ctx.translate(pt.x,pt.y);
-    //var factor = Math.pow(scaleFactor,clicks);
-    ctx.scale(zoom,zoom);
-   // ctx.translate(-pt.x,-pt.y);
-    drawCanvas();
+
+function clearInputs(){
+
+
+    $("#date-input").val("");
+    $("#cost-input").val("");
+    $("#supplier-input").val("");
+    $("#item-input").val("");
+    $("#notes-input").val("");
+    $("#receipt-link-input").val("");
+
+
 }
+// function doZoom(clicks){
+//    // var pt = ctx.transformedPoint(lastX,lastY);
+//   //  ctx.translate(pt.x,pt.y);
+//     //var factor = Math.pow(scaleFactor,clicks);
+//     ctx.scale(zoom,zoom);
+//    // ctx.translate(-pt.x,-pt.y);
+//     drawCanvas();
+// }
 
 function handleMouseScroll(e){
 
@@ -271,18 +297,12 @@ function drawCanvas(){
     //ctx.clearRect(0,0,canvas.width, canvas.height);
 
     // ctx.translate( canvas.width / 2, canvas.height / 2 )
-    ctx.scale(zoom, zoom)
-    // ctx.translate( -canvas.width / 2 + cameraOffset.x, -canvas.height / 2 + cameraOffset.y )
-
     
-    //ctx.fillStyle = "black";
-    //ctx.fillRect(0,0,canvas.width,canvas.height);
-    //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
-   // ctx.globalCompositeOperation = "color-burn";
+    // ctx.translate( -canvas.width / 2 + cameraOffset.x, -canvas.height / 2 + cameraOffset.y )
+    ctx.scale(zoom, zoom);
+    ctx.translate(-panOffset.x,-panOffset.y);
     ctx.drawImage(image,0, 0, image.width , image.height, 0, 0,  image.width * ratio, image.height * ratio);  
-
-  
-
+    
 }
 
 async function downloadFileFromServer (){
@@ -313,65 +333,63 @@ function onFileSelected(event){
 
     const file = event.target.files[0];
 
+    originalFileName = file.name.split(".")[0];
+    console.log("originalFileName", originalFileName);
+
+
     const image = document.getElementById("receipt-proxy");
   
     // image.crossOrigin = "drive.google.com";
     //image.src = e.target.result;
 
-    //image.src = URL.createObjectURL(file);
+    image.src = URL.createObjectURL(file);
 
+    $("#download-link").attr("href", image.src);
     //image.src = "https://drive.google.com/thumbnail?id=1qDvSH_t0wXO_hCI4HdSfmBsLzR5Zvang&sz=w1000";
 
-    downloadFileFromServer();
+   // downloadFileFromServer();
 
 
     $("#file-selection-container").hide();
+    $("#canvas-processing-container").show();
+    
+    
         
 
 
-
-    if($('#formFile').val().length !=0)
-        $('#submit-button').attr('disabled', false);            
-    else
-        $('#submit-button').attr('disabled',true);
-
-        var fr = new FileReader();
-
-        fr.onload = function(e) {
-
-
-           // const image = document.getElementById("receipt-proxy");
-
-           // image.src = e.target.result;
-            // let img = new Image();
-            // img.src = e.target.result;
-
-            // console.log("img", img);
-            // img.width = canvas.width;
-
-            // canvas.height = canvas.width * (img.width/img.height);
-
-            // img.onload = function() {
-            //     // The image data is now available in img
-            //     ctx.drawImage(img, 0,0, canvas.width, canvas.height  );  
-            // };
-        };
-        //fr.onload = createImage;   // onload fires after reading is complete
-       // fr.readAsDataURL($("#formFile").prop('files')[0]);  
-
-
- 
-
-
-    // (async () => {
-    //     const worker = await Tesseract.createWorker('eng');
-    //     const { data: { text } } = await worker.recognize($("#formFile").prop('files')[0]);
-    //     console.log(text);
-    //     await worker.terminate();
-    // })();
-
 }
 
+function saveFileRenamedWithDetectedData(){
+
+    var fileName = originalFileName;
+    fileName += "_";
+
+    var dateInput = $("#date-input").val();
+    dateInput = dateInput.replaceAll("/", "-");
+    fileName += dateInput;
+    fileName += "_";
+
+    var supplierInput = $("#supplier-input").val();
+    supplierInput = supplierInput.replaceAll(" ", "-");
+    fileName += supplierInput;
+    fileName += "_";
+
+    var costInput = $("#cost-input").val();
+    costInput = costInput.replaceAll(".", "-");
+
+    fileName += costInput;
+
+    $("#download-link").attr("download", fileName);
+
+    copyInputsToClipboardWithSavedFileName(fileName);
+
+    setTimeout(()=>{
+
+        $("#download-link")[0].click(); 
+
+    }, 500);
+
+}
 
 // function updateCanvasSize(image){
 
@@ -423,7 +441,8 @@ function parseTextResults(detectedText){
     var dateOptionsHtml;
 
     const dateArray = detectedText.match(/\b(?:\d{1,2}[-/])?\d{1,2}[-/]\d{4}\b/g);
-    dateArray.forEach((dateText) => {
+
+    dateArray?.forEach((dateText) => {
 
         dateOptionsHtml += `<input type="button" id="copy-to-clipboard-button" value="${dateText}" onclick="updateDateInput('${dateText}')">`;
 
@@ -433,6 +452,29 @@ function parseTextResults(detectedText){
 
     console.log("price array ", priceArray)
     console.log("price array ", dateArray)
+
+    $("#data-input-group").show();
+
+}
+
+function cancelCurrentImage(){
+
+    $("#file-selection-container").show();
+    $("#canvas-processing-container").hide();
+    $("#data-input-group").hide();
+
+    clearInputs();
+
+    $("#detected-price-options").html("");
+    $("#detected-date-options").html("");
+
+
+    $("#zoom-slider").val(0);
+    $("#pan-x-slider").val(200);
+    $("#pan-y-slider").val(200);
+
+    zoom = 1;
+    panOffset = {x:0, y:0};
 
 
 }
@@ -469,6 +511,32 @@ function copyInputsToClipboard(){
       });
 
 }
+
+
+function copyInputsToClipboardWithSavedFileName(savedFileName){
+
+
+
+    var date = $("#date-input").val();
+    var item_description = $("#item-input").val();
+    var supplier = $("#supplier-input").val();
+    var notes = $("#notes-input").val();
+    var cost = $("#cost-input").val();
+    var reciept_link = $("#reciept-link-input").val();
+    
+
+    var clipboardText = `${date}, ${item_description}, ${supplier}, ${notes}, ${cost}, ${savedFileName}`;
+     // Copy the text inside the text field
+    // navigator.clipboard.writeText(copyText.value);
+
+    navigator.clipboard.writeText(clipboardText).then(function() {
+        console.log('Async: Copying to clipboard was successful!');
+      }, function(err) {
+        console.error('Async: Could not copy text: ', err);
+      });
+
+}
+
 
 
 function contrastImage(imageData, contrast) {  // contrast input as percent; range [-1..1]

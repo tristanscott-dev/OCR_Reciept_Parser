@@ -36,8 +36,10 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
     <div class="container pt-2 ">
 
         <div class="row">
-            <div class=" col-md-7 d-flex justify-content-center" id="receipt-container">
+            <div class=" col-md-12 d-flex flex-column justify-content-center" id="receipt-container">
 
+                
+                <!-- Begin Receipt selection form input  -->
                 <div id="file-selection-container" style=" margin-top: 15vh; width:100%; height: 256px; background-repeat: no-repeat; background-size: contain;background-position: center;">
     
                     <div class="d-flex justify-content-center">
@@ -51,19 +53,68 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
                                >
                         </div>
                     </div>
-        
                 </div>
-                <div class="slidecontainer">
-                    <input type="range" min="0" max="255" value="50" class="slider" id="contrast-slider">
-                  </div>
-                <button class="btn btn-primary" onclick="processCanvasImage()">PROCESS</button>
+                <!-- End Receipt selection form input  -->
 
-                <canvas id="preview-canvas" style="display:block" width="500" height="500"></canvas> 
-     
+                <!-- Begin reciept canvas  -->
+                <div id="canvas-processing-container" class="row" style="display:none">
+
+                    <div class="col-md-6">
+
+                        <div class="d-flex justify-content-center">
+                            <canvas id="preview-canvas" style="display:block" width="500" height="500"></canvas> 
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="row slidecontainer d-flex justify-content-center flex-column" >
+                            <p style="max-width:300px;" >Contrast</p>
+                            <input type="range" min="0" max="255" value="0" class="slider" style="max-width:300px;" id="contrast-slider">
+                        </div>
+
+                        <div class="row slidecontainer d-flex justify-content-center flex-column" >
+                            <p style="max-width:300px;" >Zoom</p>
+                            <input type="range" min="0" max="300" value="0" class="slider" style="max-width:300px;" id="zoom-slider">
+                        </div>
+    
+                        <div class="row slidecontainer d-flex justify-content-center flex-column" >
+                            <p style="max-width:300px;" >Pan X</p>
+                            <input type="range" min="0" max="400" value="200" class="slider" style="max-width:300px;" id="pan-x-slider">
+                        </div>
+
+                        <div class="row slidecontainer d-flex justify-content-center flex-column" >
+                            <p style="max-width:300px;" >Pan Y</p>
+                            <input type="range" min="0" max="400" value="200" class="slider" style="max-width:300px;" id="pan-y-slider">
+                        </div>
+    
+                        <div class="row d-flex justify-content-center mt-5">
+                            <button class="btn btn-primary" style="max-width: 260px;"  onclick="processCanvasImage()">PROCESS</button>
+                        </div>
+
+                        <div class="row d-flex justify-content-center mt-5">
+                            <button class="btn btn-primary" style="max-width: 260px;"  onclick="cancelCurrentImage()">CANCEL</button>
+                        </div>
+
+                        <div class="d-flex flex-column justify-content-center">
+                            <p id="detected-price-options">
+        
+                            </p>
+        
+                            <p id="detected-date-options">
+        
+                            </p>
+        
+                        </div>
+
+                    </div>
+
+                </div>
 
             </div>
 
-
+<!-- 
             <div class=" col-md-5 d-flex justify-content-center " id="results-container">
 
                 <div
@@ -81,33 +132,42 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
                     </div>
 
                 </div>
-            </div>
+            </div> -->
 
         </div>
-        sfsf, wwwww, ffff, fyyyyy, iiii, undefined
-        <div class="row mt-5">
+        <div class="row mt-5" id="data-input-group" style="display:none">
 
             <div class=" col-md-12 d-flex justify-content-center " id="">
-                <input type="text" id="date-input" placeholder="date">
-                <input type="text" id="item-input" placeholder="item description">
-                <input type="text" id="supplier-input" placeholder="supplier">
-                <input type="text" id="notes-input" placeholder="notes">
-                <input type="text" id="cost-input" placeholder="cost">
-                <input type="text" id="reciept-link-input" placeholder="reciept link">
+                <input type="text" id="date-input" placeholder="date" value=""/>
+                <input type="text" id="item-input" placeholder="item description"/>
+                <input type="text" id="supplier-input" placeholder="supplier"/>
+                <input type="text" id="notes-input" placeholder="notes"/>
+                <input type="text" id="cost-input" placeholder="cost"/>
+                <input type="text" id="reciept-link-input" placeholder="reciept link"/>
                 <input type="button" id="copy-to-clipboard-button"  onclick="copyInputsToClipboard()" value="Copy to clipboard">
 
             </div>
+
+            <div class="row d-flex justify-content-center mt-5">
+                <button class="btn btn-primary" style="max-width: 260px;" onclick="saveFileRenamedWithDetectedData()">SAVE</button>
+
+            </div>
+
         </div>
         <!-- <form method="POST" action="./upload" enctype="multipart/form-data"> -->
 
         <!-- </form> -->
     </div>
 
+
+
     <div style="display:none;">
         <img  src="" id="receipt-proxy">
+        <a id="download-link" href='/sites/default/files/toy/jpeg/image-1419683919_4851.jpeg'
+        download='MyToy.jpeg'>Download</a>
 
     </div>
-    <iframe src="https://drive.google.com/file/d/1qDvSH_t0wXO_hCI4HdSfmBsLzR5Zvang/preview" width="640" height="480" allow="autoplay"></iframe>
+    <!-- <iframe src="https://drive.google.com/file/d/1qDvSH_t0wXO_hCI4HdSfmBsLzR5Zvang/preview" width="640" height="480" allow="autoplay"></iframe> -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"></script>
