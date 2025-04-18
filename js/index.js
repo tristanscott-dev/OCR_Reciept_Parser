@@ -291,15 +291,22 @@ function drawCanvas(){
     var centerShift_x = ( canvas.width - image.width * ratio ) / 2;
     var centerShift_y = ( canvas.height - image.height * ratio ) / 2;  
 
+
+
     console.log("dra canvas applying zoom " , zoom);
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    //ctx.clearRect(0,0,canvas.width, canvas.height);
 
-    // ctx.translate( canvas.width / 2, canvas.height / 2 )
+    ctx.translate(centerShift_x,centerShift_y);
+    ctx.scale(zoom,zoom);
+    ctx.translate(-centerShift_x,-centerShift_y);
+    
+    //ctx.clearRect(0,0,canvas.width, canvas.height);
+    //ctx.scale(zoom, zoom);
+    //ctx.translate( centerShift_x , centerShift_y )
     
     // ctx.translate( -canvas.width / 2 + cameraOffset.x, -canvas.height / 2 + cameraOffset.y )
-    ctx.scale(zoom, zoom);
+    
     ctx.translate(-panOffset.x,-panOffset.y);
     ctx.drawImage(image,0, 0, image.width , image.height, 0, 0,  image.width * ratio, image.height * ratio);  
     
@@ -333,12 +340,19 @@ function onFileSelected(event){
 
     const file = event.target.files[0];
 
-    originalFileName = file.name.split(".")[0];
+    const fileNameParts =  file.name.split(".");
+    originalFileName = fileNameParts[0];
     console.log("originalFileName", originalFileName);
 
+    const fileUrl = URL.createObjectURL(file);
 
     const image = document.getElementById("receipt-proxy");
   
+    if(fileNameParts[1] == "pdf"){
+        loadPdfFile(fileUrl);
+        
+        return;
+    }
     // image.crossOrigin = "drive.google.com";
     //image.src = e.target.result;
 
@@ -357,6 +371,33 @@ function onFileSelected(event){
         
 
 
+}
+
+
+function loadPdfFile(pdfUrl){
+
+
+    var loadingTask = pdfjsLib.getDocument(pdfUrl);
+    loadingTask.promise.then(function(pdf) {
+      console.log('PDF loaded');
+  
+        // Fetch the first page
+        var pageNumber = 1;
+        pdf.getPage(pageNumber).then(function(page) {
+
+            var scale = 1.5;
+            var viewport = page.getViewport({scale: scale});
+        
+            var renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+          var renderTask = page.render(renderContext);
+
+      
+
+        })
+    });
 }
 
 function saveFileRenamedWithDetectedData(){

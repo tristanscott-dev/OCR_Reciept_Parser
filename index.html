@@ -20,6 +20,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
     <link href="https://fonts.googleapis.com/css2?family=Happy+Monkey&display=swap" rel="stylesheet"> -->
 
     <link rel="stylesheet" href="./css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.0.375/pdf_viewer.min.css" integrity="sha512-bt54/qzXTxutlNalAuK/V3dxe1T7ZDqeEYbZPle3G1kOH+K1zKlQE0ZOkdYVwPDxdCFrdLHwneslj7sA5APizQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
 
@@ -49,7 +50,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
     
                                 <label for="formFile" class="form-label happy-monkey-regular" style="font-size: 24px;">Select a reciept</label>
                             </div>
-                            <input class="form-control " type="file" name="file" id="formFile" accept="image/*"
+                            <input class="form-control " type="file" name="file" id="formFile" accept="image/*, application/pdf"
                                >
                         </div>
                     </div>
@@ -179,6 +180,12 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
         crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <!-- <script src="./js/scroll_pan_canvas.js"></script> -->
+
+        <script type="module">
+            import pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.1.91/+esm'
+        </script>
+
+
 
     <script src="./js/index.js"></script>
 
