@@ -567,6 +567,8 @@ function cancelCurrentImage(){
     zoom = 1;
     panOffset = {x:0, y:0};
 
+    window.location="./index.html";
+
 
 }
 
