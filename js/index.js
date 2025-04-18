@@ -6,6 +6,8 @@ let pan = { x: window.innerWidth/2, y: window.innerHeight/2 }
 let zoom = 1.5;
 let prevZoomSliderVal = 0;
 
+var contrast = 0;
+
 let isPanning = false;
 let prevPanXVal = 0;
 let prevPanYVal = 0;
@@ -114,7 +116,12 @@ $(document).ready(function(){
         return;
         }
 
-        enhance(canvasPixelDataOriginal, this.value );
+        contrast = this.value;
+
+        zoom = 1;
+        drawCanvas();
+
+       // enhance(canvasPixelDataOriginal, this.value );
 
     }
 
@@ -219,7 +226,7 @@ $(document).ready(function(){
 
         drawCanvas();
 
-        canvasPixelDataOriginal = ctx.getImageData(0, 0, canvas.width,canvas.height).data;
+        //canvasPixelDataOriginal = ctx.getImageData(0, 0, canvas.width,canvas.height).data;
 
     });
 
@@ -280,8 +287,9 @@ function handleMouseScroll(e){
 
 }
 
-function drawCanvas(){
+function applyContextSettings(){
 
+    
     var hRatio = canvas.width  / image.width    ;
     var vRatio =  canvas.height / image.height  ;
 
@@ -297,10 +305,14 @@ function drawCanvas(){
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
+    ctx.fillStyle = "#eee";
+    ctx.fillRect(0, 0, canvas.width,canvas.height);
+
+
     ctx.translate(centerShift_x,centerShift_y);
     ctx.scale(zoom,zoom);
     ctx.translate(-centerShift_x,-centerShift_y);
-    
+
     //ctx.clearRect(0,0,canvas.width, canvas.height);
     //ctx.scale(zoom, zoom);
     //ctx.translate( centerShift_x , centerShift_y )
@@ -308,7 +320,45 @@ function drawCanvas(){
     // ctx.translate( -canvas.width / 2 + cameraOffset.x, -canvas.height / 2 + cameraOffset.y )
     
     ctx.translate(-panOffset.x,-panOffset.y);
-    ctx.drawImage(image,0, 0, image.width , image.height, 0, 0,  image.width * ratio, image.height * ratio);  
+
+
+    return { aspect_ratio : ratio };
+}
+
+function drawCanvas(){
+
+    // var hRatio = canvas.width  / image.width    ;
+    // var vRatio =  canvas.height / image.height  ;
+
+    // var ratio  = Math.min ( hRatio, vRatio );
+
+
+    // var centerShift_x = ( canvas.width - image.width * ratio ) / 2;
+    // var centerShift_y = ( canvas.height - image.height * ratio ) / 2;  
+
+
+
+    // console.log("dra canvas applying zoom " , zoom);
+
+    // ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // ctx.translate(centerShift_x,centerShift_y);
+    //ctx.scale(zoom,zoom);
+    //ctx.translate(-centerShift_x,-centerShift_y);
+
+    //ctx.clearRect(0,0,canvas.width, canvas.height);
+    //ctx.scale(zoom, zoom);
+    //ctx.translate( centerShift_x , centerShift_y )
+    
+    // ctx.translate( -canvas.width / 2 + cameraOffset.x, -canvas.height / 2 + cameraOffset.y )
+    
+    //ctx.translate(-panOffset.x,-panOffset.y);
+
+    let ratio = applyContextSettings().aspect_ratio;
+
+    ctx.drawImage(image,0, 0, image.width , image.height, 0, 0,  image.width * ratio, image.height * ratio); 
+    
+    enhance( ctx.getImageData(0, 0, canvas.width,canvas.height).data, contrast);
     
 }
 
@@ -636,7 +686,6 @@ function conv3x(data, idx, w, m){
   function enhance(pixels, pixelThreshold)
   {
 
-
     var canvasImageData = ctx.getImageData(0, 0, canvas.width,canvas.height)
     var data = canvasImageData.data;
 
@@ -661,6 +710,8 @@ function conv3x(data, idx, w, m){
 
     //newPixels.data.set(buff);
     ctx.putImageData(canvasImageData, 0, 0);
+
+    //drawCanvas();
     
     //return newPixels;
   }
